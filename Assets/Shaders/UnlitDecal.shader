@@ -56,16 +56,16 @@
                 // float4 localPos = mul(unity_WorldToObject, float4(worldPos,1));
                 float4x4 invMV = i.invMV;
                 float4 localPos = mul(invMV, viewPos);
+                localPos.xyz /= localPos.w;
+                clip(0.5f - abs(localPos.xyz));
 
-                float2 uv = localPos.xy / localPos.w;
-                clip(0.5f - abs(uv));
-                uv += 0.5f;
+                float2 uv = localPos.xy + 0.5f;
                 uv = TRANSFORM_TEX(uv, _MainTex);
 
                 half4 c = tex2D(_MainTex, uv);
-                clip(c - _Cutout);
+                clip(c.a * _Color.a - _Cutout);
 
-                c.rgb *= _Color;
+                c.rgb *= _Color.rgb;
                 UNITY_APPLY_FOG(i.fogCoord, c);
                 return c;
             }
